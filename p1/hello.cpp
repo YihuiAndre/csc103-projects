@@ -9,5 +9,21 @@
  * References:
  *
  */
+#include <iostream>
+using std::cout;
+using std::cin;
+#include <string>
+using std::string;
 
+int main()
+{
+ cout << "Enter your name:\n";
+ string name;
+ getline(cin,name);
+ string relative;
+ cout << "Enter a relative:\n";
+ getline(cin,relative);
+ cout << "Hello. My name is " << name << ". You killed my " << relative << ". Prepare to die.\n";
+ return 0;
+}
 
