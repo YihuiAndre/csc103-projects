@@ -18,12 +18,12 @@ using std::string;
 int main()
 {
  cout << "Enter your name:\n";
- string name;
+ string name; //user input
  getline(cin,name);
- string relative;
+ string relative; //user input
  cout << "Enter a relative:\n";
  getline(cin,relative);
- cout << "Hello. My name is " << name << ". You killed my " << relative << ". Prepare to die.\n";
+ cout << "Hello. My name is " << name << ". You saved my " << relative << ". Thank you very much.\n";
  return 0;
 }
 
