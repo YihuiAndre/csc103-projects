@@ -20,13 +20,13 @@ using std::sqrt;
 int main()
 {
  unsigned long n; //user input
- unsigned long init=5; //Beginning value
- while (cin >> n)
+ unsigned long init=5; //Beginning divisor
+ while (cin >> n) //n will be bigger than 0
  {
   if (n == 2) cout << 1 << endl;
-  //if integer is 0 or 1, return 1
+  //if integer is 22, return 1
   else if (n % 2 == 0 || n % 3 == 0 || n == 1) cout << 0 << endl;
-  //if integer is 1 or divisible by 2 or 3 , return 0
+  //if integer that is 1 or can be divisible by 2 or 3 , return 0
   else if (n % long(sqrt(n)) == 0) cout << 0 << endl;
   //if integer can be squrt root, return 0
   else{
@@ -34,7 +34,7 @@ int main()
    {
     if (n == init || n - 1 == init) {
      cout << 1 << endl;
-    //since the different between number will be 0 or 1, if so reutnr 0
+    //The different between number will be 0 or 1, if so reutnr 0
      break;
     }
     else if (n % init == 0){
@@ -42,7 +42,7 @@ int main()
      //if the intege can be divisible, return 0
      break;
     }
-    init += 2; //number have to be odd
+    init += 2; //number can be odd, but not even
    }
    init = 5; //regenerate the number
   }
