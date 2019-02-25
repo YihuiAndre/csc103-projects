@@ -2,33 +2,38 @@
 using std::cout;
 using std::cin;
 using std::endl;
+#include<stdio.h>
 #include<climits>
 
-void sort(int x[], int len);
+void display(int L[], int len);
 
 int main()
 {
-  int min; //determine the smallest
-  int unsort[] = {-3,2,-5,2,-1,4};
-
-  int Smallest = INT_MAX;
+  const unsigned int length = sizeof(unsort)/4;
   int Loc;
-  for (int i = 0; i < sizeof(unsort)/4; i++)
+  for (size_t i = 0; i < length; i++) // fix the variable
   {
-    for (int j = i; j < sizeof(unsort)/4; j++)
+    int Smallest = INT_MAX;
+    for (size_t j = i; j < length; j++) // search the rest except unsort[i]
     {
-      if (Smallest > unsort[j])
+      if (Smallest > unsort[j]) // if unsort[j] has smallest value record it
       {
         Smallest = unsort[j];
-        Loc = j;
+        Loc = j; //location
       }
     }
     unsort[Loc]=unsort[i];
     unsort[i]=Smallest;
-    Smallest = INT_MAX;
   }
-  for (int k = 0; k < sizeof(unsort)/4; k++)
-    {
-      cout << unsort[k] << " ";
-    }
+  display(unsort, length);
+  return 0;
+}
+
+void display(int L[], int len)
+{
+  for (size_t k = 0; k < len; k++)
+  {
+    printf("%d ",L[k]);
+  }
+  printf("\n");
 }
