@@ -10,7 +10,7 @@
  *
  *
  * Finally, please indicate approximately how many hours you spent on this:
- * #hours: 
+ * #hours:7 
  */
 
 #include <cstdio>
@@ -38,10 +38,10 @@ string initfilename = "/tmp/gol-world-current"; /* read initial state from here.
 /* NOTE: you don't have to write these functions -- this is just how
  * I chose to organize my code. */
 size_t nbrCount(size_t i, size_t j, const vector<vector<bool> >& g);
-void update();
+void update(); //transform old version into new one
 int initFromFile(const string& fname); /* read initial state into vectors. */
-void mainLoop();
-void dumpState(FILE* f);
+void mainLoop(); //updata status, write status, sleep, repeat
+void dumpState(FILE* f);//write the state to a file
 
 /* NOTE: you can use a *boolean* as an index into the following array
  * to translate from bool to the right characters: */
@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
 	 * named "-"! */
 
 	/* If you wrote the initFromFile function, call it here: */
-	// initFromFile(initfilename);
+	initFromFile(initfilename);
 	mainLoop();
 	return 0;
 }
@@ -103,3 +103,40 @@ void mainLoop() {
 		 * max_gen is reached... */
 	}
 }
+
+int initFromFile(const string& fname) /* read initial state into vectors. */
+{
+	char c;
+	vector<vector<bool>> world;
+	FILE* f = fopen(fname.c_str(), "rb");
+	world.push_back(vector<bool>());
+	size_t rows = 0;
+	while (fread(&c,1,1,f)){
+		if (c == '\n') {
+			rows++;
+			world.push_back(vector<bool>());
+		}else if (c == '.') {
+			world[rows].push_back(false);
+		} else {
+			world[rows].push_back(true);
+		}
+	}
+	
+}
+
+size_t nbrCount(size_t i, size_t j, const vector<vector<bool> >& g)
+{
+	size_t Neighbors = 0;
+	for (size_t row = 0; row < 3; row++)
+	{
+		size_t Rindex = ((i-1+row)+g.size())%(g.size());
+		for (size_t col = 0; col < 3; col++)
+		{
+			size_t Cindex = ((j-1+col)+g[0].size())%(g[0].size());
+			Neighbors += g[Rindex][Cindex];
+		}
+	}
+	return Neighbors - g[i][j];
+}
+
+

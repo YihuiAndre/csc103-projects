@@ -2,6 +2,7 @@
 using std::vector;
 #include <iostream>
 using std::cout;
+#include <unistd.h>
 
 void display(vector<vector<bool>> V);
 //display the matrix on the console
@@ -9,6 +10,8 @@ bool detect(const int row, const int col);
 //return the bool value in the specific row and col dead or live
 size_t detectN(const int row, const int col);
 //return how many neighbors near the specific location
+void initial(vector<size_t>& R, vector<size_t>& C);
+//change the vector which contain the different position
 
 vector<vector<bool> > T_world = {
 {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -21,7 +24,7 @@ vector<vector<bool> > T_world = {
 {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
 {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-};
+}; //for testing
 
 vector<vector<bool>> world = {
 {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -36,10 +39,10 @@ vector<vector<bool>> world = {
 {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 };
 
-vector<size_t> Row = {world.size()-1,0,1,2,3,4,5,6,7,8,9,0};
-vector<size_t> Col = {world[0].size()-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,0};
+vector<size_t> Row; //Position EX.{world.size()-1,0,1,2,3,4,5,6,7,8,9,0}
+vector<size_t> Col;//Position EX.{world[0].size()-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,0}
 //each element in Row and Col corresponding to different index in world
-
+//
 vector<vector<bool> > newWorld = world;
 
 int main()
@@ -51,6 +54,7 @@ int main()
 	//cout << world[7][15] << " " << detect(7,15) << " ";
 	//cout << world[6][14] << " " << detect(6,14) << " ";
 	//cout << world[1][19] << " " << detect(1,19) << " ";
+	initial(Row,Col);
 	size_t n;
 	std::cin >> n;
 	for (size_t i = 0; i < n; i++)
@@ -63,11 +67,25 @@ int main()
 			}
 		}
 		world = newWorld;
+		display(world);
+		sleep(1);
 	}
-	display(world);
 	return 0;
 }
 
+void initial(vector<size_t>& R, vector<size_t>& C)
+{
+	R.push_back(world.size()-1);
+	C.push_back(world[0].size()-1);
+	for (size_t i = 0; i < world.size(); i++){
+		R.push_back(i);
+	}
+	R.push_back(0);
+	for (size_t k = 0; k < world[0].size(); k++){
+		C.push_back(k);
+	}
+	C.push_back(0);
+}
 
 void display(vector<vector<bool>> V)
 {
@@ -80,6 +98,7 @@ void display(vector<vector<bool>> V)
 		}
 		cout << "\n";
 	}
+	cout << "\n";
 }
 
 bool detect(const int row, const int col)
