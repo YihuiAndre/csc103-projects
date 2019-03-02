@@ -4,8 +4,7 @@ using namespace std;
 
 bool search(vector<int>& k, int s);
 
-int main()
-{
+int main(){
 	vector<int> g;
 	g.push_back(12);
 	g.push_back(13);
