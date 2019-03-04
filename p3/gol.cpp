@@ -10,10 +10,8 @@
  *
  *
  * Finally, please indicate approximately how many hours you spent on this:
- * #hours:9 
+ * #hours:12 
  */
-#include <iostream>
-
 #include <cstdio>
 #include <stdlib.h> // for exit();
 #include <getopt.h> // to parse long arguments.
@@ -22,6 +20,8 @@
 using std::vector;
 #include <string>
 using std::string;
+
+#include<iostream>
 using std::cout;
 
 static const char* usage =
@@ -40,10 +40,11 @@ string initfilename = "/tmp/gol-world-current"; /* read initial state from here.
 /* NOTE: you don't have to write these functions -- this is just how
  * I chose to organize my code. */
 size_t nbrCount(size_t i, size_t j, const vector<vector<bool> >& g);
-void update(); //transform old version into new one
+//count the total neiborhors around index i and j;
+void update(); //transform old world into new world
 int initFromFile(const string& fname); /* read initial state into vectors. */
 void mainLoop(); //updata status, write status, sleep, repeat
-void dumpState(FILE* f);//write the state to a file
+void dumpState(FILE* f);//write the state to a file, give the output to a file
 
 /* NOTE: you can use a *boolean* as an index into the following array
  * to translate from bool to the right characters: */
@@ -84,10 +85,9 @@ int main(int argc, char *argv[]) {
 	}
 	/* NOTE: at this point wfilename initfilename and max_gen
 	 * are all set according to the command line: */	
-	if (wfilename == "-") wfilename = "stdout"; //change?
-	printf("input file:  %s\n",initfilename.c_str());
-	printf("output file: %s\n",wfilename.c_str());
-	printf("fast forward to generation: %lu\n",max_gen);
+	//printf("input file:  %s\n",initfilename.c_str());
+	//printf("output file: %s\n",wfilename.c_str());
+	//printf("fast forward to generation: %lu\n",max_gen);
 	/* TODO: comment out 3 lines above once you see what's in them. */
 	/* NOTE: if wfilename == "-" you should write to stdout, not a file
 	 * named "-"! */
@@ -101,19 +101,25 @@ int main(int argc, char *argv[]) {
 void mainLoop() {
 	/* TODO: write this */
 	/* update, write, sleep */	
-	cWorld = world;
-	fworld = fopen(wfilename.c_str(), "wb");
+	cWorld = world;//copy world to other world
+	if (wfilename == "-"){ 
+		FILE* stdin(stdout);
+		fworld = stdout; //fword is global variable, so we can access in anywhere
+	}
+	else fworld = fopen(wfilename.c_str(), "wb");
 	if (max_gen == 0) {
 		/* make one generation update per second */
-		update();
-		dumpState(fworld);
+		while(true){
+			update();
+			dumpState(fworld);
+			sleep(1);
+		}
 	} else {
 		/* go through generations as fast as you can until
 		 * max_gen is reached... */
 		for (size_t k = 0; k < max_gen; k++)
 		{
 			update();
-			sleep(1);
 		}
 			dumpState(fworld);
 	}
@@ -122,60 +128,64 @@ void mainLoop() {
 
 size_t nbrCount(size_t i, size_t j, const vector<vector<bool> >& g)
 {
-	size_t Neighbors = 0;
+	size_t Neighbors = 0, Rindex, Cindex;
 	for (size_t row = 0; row < 3; row++)
 	{
-		size_t Rindex = ((i-1+row)+g.size())%(g.size());
+		Rindex = (i+row+g.size()-1)%(g.size());//return between 0 to n-1
 		for (size_t col = 0; col < 3; col++)
 		{
-			size_t Cindex = ((j-1+col)+g[0].size())%(g[0].size());
+			Cindex = (j+col+g[0].size()-1)%(g[0].size());
 			Neighbors += g[Rindex][Cindex];
 		}
+
 	}
-	return Neighbors - g[i][j];
+	return Neighbors - g[i][j];//since it count itself, need to subtract it
 }
 
-int initFromFile(const string& fname) /* read initial state into vectors. */
+int initFromFile(const string& fname) 
 {
 	FILE* f  = fopen(fname.c_str(), "rb");
-	if (!f) exit(1);
+	if (!f) exit(1); //test if file fail
 	char c;
 	world.push_back(vector<bool> ());
 	size_t row = 0;
 	while (fread(&c,1,1,f))
 	{
-		if (c == '\n'){
-			row++;
-			world.push_back(vector<bool> ());
+		if (c != '{' && c != ',' && c != '}'){ 
+			//in case the file contain {0,0,1},{1,0,0}
+			if (c == '\n'){
+				row++;
+				world.push_back(vector<bool> ());
+			}
+			else if (c == '.' || c == '0') world[row].push_back(false);
+			else world[row].push_back(true);
 		}
-		else if (c == '.') world[row].push_back(false);
-		else world[row].push_back(true);
 	}
 	world.pop_back();
 	fclose(f);
 	return 0;
 }
 
-void update() //transform old version into new one
+void update()
 {
 	size_t nbr = 0;
-	for (size_t r = 0; r < cWorld.size(); r++ ){
-		for (size_t c = 0; c < cWorld[0].size(); c++){
+	for (size_t r = 0; r < world.size(); r++ ){
+		for (size_t c = 0; c < world[0].size(); c++){
+			//check each index in world
 			nbr = nbrCount(r,c,world);
-			if (world[r][c]){
-				if (nbr == 2 || nbr == 3) cWorld[r][c] = true;
-				else cWorld[r][c] = false;
+			if (world[r][c]){ //if the cell is live
+				if (nbr < 2 || nbr > 3) cWorld[r][c] = false;
 			}
-			else{
+			else{ //if the cell is dead
 				if (nbr == 3) cWorld[r][c] = true;
 			}
 		}
-		nbr = 0;
+		nbr = 0;//regenerate the number
 	}
 	world = cWorld;
 }
 
-void dumpState(FILE* f) //write the state to a file
+void dumpState(FILE* f)
 {
 	if (!f) exit(1);
 	char c;
@@ -183,13 +193,14 @@ void dumpState(FILE* f) //write the state to a file
 	{
 		for (size_t col = 0; col < world[0].size(); col++)
 		{
-			c = text[world[row][col]];
+			c = text[world[row][col]]; // we know text[0] give . and text[1] give O
 			fwrite(&c,1,1,f);
 		}
 		c = '\n';
-		if (row != world.size()-1) fwrite(&c,1,1,f);
+		fwrite(&c,1,1,f);
 	}
-
+	rewind(f);//return to beginning of the file
 }
+
 
 

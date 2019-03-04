@@ -40,7 +40,7 @@ vector<vector<bool>> world = {
 };
 
 vector<size_t> Row; //Position EX.{world.size()-1,0,1,2,3,4,5,6,7,8,9,0}
-vector<size_t> Col;//Position EX.{world[0].size()-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,0}
+vector<size_t> Col;//Position EX.{world[0].size()-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,}
 //each element in Row and Col corresponding to different index in world
 //
 vector<vector<bool> > newWorld = world;
@@ -53,7 +53,7 @@ int main()
 	 * contents of ../res/tests/1.*/
 	//cout << world[7][15] << " " << detect(7,15) << " ";
 	//cout << world[6][14] << " " << detect(6,14) << " ";
-	//cout << world[1][19] << " " << detect(1,19) << " ";
+	cout << world[1][18] << " " << detect(1,18) << " ";
 	initial(Row,Col);
 	size_t n;
 	std::cin >> n;
@@ -67,9 +67,9 @@ int main()
 			}
 		}
 		world = newWorld;
-		display(world);
-		sleep(1);
+	//	sleep(1);
 	}
+	display(world);
 	return 0;
 }
 
@@ -119,13 +119,18 @@ bool detect(const int row, const int col)
 
 size_t detectN(const int row, const int col)
 {
-	int neighbors = 0;
+	size_t neighbors = 0, RH = 0, CH = 0;
 	//size_t last_row = world.size()-1, last_col = world[0].size()-1;
-	for (int r = row - 1; r < row + 2; r++) //row-1 row row+1
+	for (size_t r = 0; r < 3; r++) //row-1 row row+1
 	{
-		for (int c = col - 1; c < col + 2; c++) //col-1 col col+1
+		RH = (row+r+world.size()-1)%world.size();
+		for (size_t c = 0; c < 3; c++) //col-1 col col+1
 		{
-			neighbors += world[Row[r+1]][Col[c+1]];
+			CH = (c+col+world[0].size()-1)%world[0].size();
+			neighbors += world[RH][CH];
+			
+
+			//neighbors += world[Row[r+1]][Col[c+1]];
 
 			/*
 			if (r == -1 || c == -1 || r == int(world.size()) || c == int(world[0].size()))
