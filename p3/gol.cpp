@@ -10,8 +10,9 @@
  *
  *
  * Finally, please indicate approximately how many hours you spent on this:
- * #hours:7 
+ * #hours:9 
  */
+#include <iostream>
 
 #include <cstdio>
 #include <stdlib.h> // for exit();
@@ -21,6 +22,7 @@
 using std::vector;
 #include <string>
 using std::string;
+using std::cout;
 
 static const char* usage =
 "Usage: %s [OPTIONS]...\n"
@@ -46,6 +48,8 @@ void dumpState(FILE* f);//write the state to a file
 /* NOTE: you can use a *boolean* as an index into the following array
  * to translate from bool to the right characters: */
 char text[3] = ".O";
+vector<vector<bool>> world;
+vector<vector<bool>> cWorld; //copy of the world
 
 int main(int argc, char *argv[]) {
 	// define long options
@@ -79,7 +83,8 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	/* NOTE: at this point wfilename initfilename and max_gen
-	 * are all set according to the command line: */
+	 * are all set according to the command line: */	
+	if (wfilename == "-") wfilename = "stdout"; //change?
 	printf("input file:  %s\n",initfilename.c_str());
 	printf("output file: %s\n",wfilename.c_str());
 	printf("fast forward to generation: %lu\n",max_gen);
@@ -95,34 +100,25 @@ int main(int argc, char *argv[]) {
 
 void mainLoop() {
 	/* TODO: write this */
-	/* update, write, sleep */
+	/* update, write, sleep */	
+	cWorld = world;
+	fworld = fopen(wfilename.c_str(), "wb");
 	if (max_gen == 0) {
 		/* make one generation update per second */
+		update();
+		dumpState(fworld);
 	} else {
 		/* go through generations as fast as you can until
 		 * max_gen is reached... */
+		for (size_t k = 0; k < max_gen; k++)
+		{
+			update();
+			sleep(1);
+		}
+			dumpState(fworld);
 	}
 }
 
-int initFromFile(const string& fname) /* read initial state into vectors. */
-{
-	char c;
-	vector<vector<bool>> world;
-	FILE* f = fopen(fname.c_str(), "rb");
-	world.push_back(vector<bool>());
-	size_t rows = 0;
-	while (fread(&c,1,1,f)){
-		if (c == '\n') {
-			rows++;
-			world.push_back(vector<bool>());
-		}else if (c == '.') {
-			world[rows].push_back(false);
-		} else {
-			world[rows].push_back(true);
-		}
-	}
-	
-}
 
 size_t nbrCount(size_t i, size_t j, const vector<vector<bool> >& g)
 {
@@ -137,6 +133,63 @@ size_t nbrCount(size_t i, size_t j, const vector<vector<bool> >& g)
 		}
 	}
 	return Neighbors - g[i][j];
+}
+
+int initFromFile(const string& fname) /* read initial state into vectors. */
+{
+	FILE* f  = fopen(fname.c_str(), "rb");
+	if (!f) exit(1);
+	char c;
+	world.push_back(vector<bool> ());
+	size_t row = 0;
+	while (fread(&c,1,1,f))
+	{
+		if (c == '\n'){
+			row++;
+			world.push_back(vector<bool> ());
+		}
+		else if (c == '.') world[row].push_back(false);
+		else world[row].push_back(true);
+	}
+	world.pop_back();
+	fclose(f);
+	return 0;
+}
+
+void update() //transform old version into new one
+{
+	size_t nbr = 0;
+	for (size_t r = 0; r < cWorld.size(); r++ ){
+		for (size_t c = 0; c < cWorld[0].size(); c++){
+			nbr = nbrCount(r,c,world);
+			if (world[r][c]){
+				if (nbr == 2 || nbr == 3) cWorld[r][c] = true;
+				else cWorld[r][c] = false;
+			}
+			else{
+				if (nbr == 3) cWorld[r][c] = true;
+			}
+		}
+		nbr = 0;
+	}
+	world = cWorld;
+}
+
+void dumpState(FILE* f) //write the state to a file
+{
+	if (!f) exit(1);
+	char c;
+	for (size_t row = 0; row < world.size(); row++)
+	{
+		for (size_t col = 0; col < world[0].size(); col++)
+		{
+			c = text[world[row][col]];
+			fwrite(&c,1,1,f);
+		}
+		c = '\n';
+		if (row != world.size()-1) fwrite(&c,1,1,f);
+	}
+
 }
 
 
