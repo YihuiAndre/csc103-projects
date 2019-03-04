@@ -136,6 +136,7 @@ size_t nbrCount(size_t i, size_t j, const vector<vector<bool> >& g)
 		{
 			Cindex = (j+col+g[0].size()-1)%(g[0].size());
 			Neighbors += g[Rindex][Cindex];
+			if (Neighbors > 4) break;
 		}
 
 	}
