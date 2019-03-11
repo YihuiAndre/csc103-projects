@@ -1,0 +1,91 @@
+/* TODO: given an integer n, find exponent of the largest power of two that
+ * divides n.  Example: if n = r*8 with r odd, then you should output 3
+ * since 8 = 2^3.  (You are just recovering the exponent of the 2 in the
+ * number's factorization into primes.)
+ * (IDEA: keep on dividing n by two until we can't,
+ * and keep track of how many times it worked.) */
+
+
+	/* TODO: finish our "brute force" process for the gcd of two integers */
+
+
+  	/* TODO: write a program that reads (arbitrarily many) integers from
+	 * stdin and outputs the *second* smallest one.  NOTE: you don't need
+	 * to store many numbers (all at once, that is) to do this!  You'll
+	 * only need a few integer variables.  Think about invariants! */
+
+
+   Lec 5 note.pdf
+
+
+  Lec 7 everything
+
+
+  /* TODO: write a function that takes a vector and places the elements
+ * in sorted order.  Warning: this could be kind of challenging. */
+
+
+/* TODO: write a function called "push_front(V,x)" for a vector, which
+ * adds parameter x to index 0 of vector V by moving all the other values
+ * to higher indexes. */
+
+
+ write binary search, if you haven't already.
+
+
+  * (1) write a function that reverses the order of the elements of
+ * a vector given as input.  It should have void return type and reverse
+
+
+ /* TODO: write a function that takes a string and returns a boolean
+ * indicating whether or not it was a palindrome. (backward and frontward)
+ * */
+
+/* TODO: write a function that takes a string by reference and reverses it.
+ * */
+
+
+/* TODO: write a function that reads an integer b (say b < 10), and
+ * another integer n, and then prints a string that represents the
+ * integer n in base b.  E.g., if b=7 and n=94, your program would
+ * output digits "163", as 94 = 1*49 + 6*7 + 3.  ("361" is also ok if
+ * you print the least significant digit first).  Or if b=2 and n=7,
+ * then you would print "111" since 7 = 1*4 + 1*2 + 1. */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   /* TODO: (WARNING: THIS IS NOT EASY. Only attempt this if you are bored.)
+ * The previous exercise asked for you to compute the nth term of the
+ * Fibonacci sequence.  Try to estimate approximately how many steps (number
+ * of C++ statements, roughly) that your function takes to evaluate the input
+ * n.  You will probably find that it is close to some constant multiple of n.
+ * It turns out that there is a very clever way to do this in approximately
+ * log(n) steps!  To find it, you'll probably need a hint or two to even get
+ * started.  Ask me if you're interested.
+ * */

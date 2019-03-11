@@ -6,11 +6,11 @@
  * and the book, please list everything.  And remember- citing a source does
  * NOT mean it is okay to COPY THAT SOURCE.  What you submit here **MUST BE
  * YOUR OWN WORK**.
- * References:
+ * References:readme.html
  *
  *
  * Finally, please indicate approximately how many hours you spent on this:
- * #hours:12 
+ * #hours:13 
  */
 #include <cstdio>
 #include <stdlib.h> // for exit();
@@ -20,9 +20,6 @@
 using std::vector;
 #include <string>
 using std::string;
-
-#include<iostream>
-using std::cout;
 
 static const char* usage =
 "Usage: %s [OPTIONS]...\n"
@@ -42,7 +39,7 @@ string initfilename = "/tmp/gol-world-current"; /* read initial state from here.
 size_t nbrCount(size_t i, size_t j, const vector<vector<bool> >& g);
 //count the total neiborhors around index i and j;
 void update(); //transform old world into new world
-int initFromFile(const string& fname); /* read initial state into vectors. */
+void initFromFile(const string& fname); /* read initial state into vectors. */
 void mainLoop(); //updata status, write status, sleep, repeat
 void dumpState(FILE* f);//write the state to a file, give the output to a file
 
@@ -102,7 +99,7 @@ void mainLoop() {
 	/* TODO: write this */
 	/* update, write, sleep */	
 	cWorld = world;//copy world to other world
-	if (wfilename == "-"){ 
+	if (wfilename == "-"){ //in case there is not file name given
 		FILE* stdin(stdout);
 		fworld = stdout; //fword is global variable, so we can access in anywhere
 	}
@@ -120,6 +117,7 @@ void mainLoop() {
 		for (size_t k = 0; k < max_gen; k++)
 		{
 			update();
+			sleep(1);
 		}
 			dumpState(fworld);
 	}
@@ -134,18 +132,17 @@ size_t nbrCount(size_t i, size_t j, const vector<vector<bool> >& g)
 		Rindex = (i+row+g.size()-1)%(g.size());//return between 0 to n-1
 		for (size_t col = 0; col < 3; col++)
 		{
-			Cindex = (j+col+g[0].size()-1)%(g[0].size());
+			Cindex = (j+col+g[0].size()-1)%(g[0].size());//return between 0 to n-1
 			Neighbors += g[Rindex][Cindex];
-			if (Neighbors > 4) break;
+			if (Neighbors > 4) break; //if Neighbors are bigger than 4, no need to consider other position
 		}
-
 	}
 	return Neighbors - g[i][j];//since it count itself, need to subtract it
 }
 
-int initFromFile(const string& fname) 
+void initFromFile(const string& fname) 
 {
-	FILE* f  = fopen(fname.c_str(), "rb");
+	FILE* f  = fopen(fname.c_str(), "rb"); //read file
 	if (!f) exit(1); //test if file fail
 	char c;
 	world.push_back(vector<bool> ());
@@ -164,12 +161,11 @@ int initFromFile(const string& fname)
 	}
 	world.pop_back();
 	fclose(f);
-	return 0;
 }
 
 void update()
 {
-	size_t nbr = 0;
+	size_t nbr; //neighbors
 	for (size_t r = 0; r < world.size(); r++ ){
 		for (size_t c = 0; c < world[0].size(); c++){
 			//check each index in world
@@ -181,7 +177,6 @@ void update()
 				if (nbr == 3) cWorld[r][c] = true;
 			}
 		}
-		nbr = 0;//regenerate the number
 	}
 	world = cWorld;
 }
@@ -200,7 +195,7 @@ void dumpState(FILE* f)
 		c = '\n';
 		fwrite(&c,1,1,f);
 	}
-	rewind(f);//return to beginning of the file
+	rewind(f);//return to beginning of the file and rewrite it
 }
 
 
