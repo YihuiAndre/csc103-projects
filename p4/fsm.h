@@ -50,14 +50,14 @@ namespace cppfsm {
 	// constant integers.  It would be (more or less) the same to say:
 	// const unsigned int normal=0,comment=1,...  and so on.
 	enum states {
-		start,   // the start state
+		start,   // the start state (0)
 		scanid,  // we are in the middle of scanning an identifier
-		comment, // we are scanning a comment
+		comment, // we are scanning a comment (2)
 		strlit,  // we're scanning a string literal (double quotes: "")
 		readfs,  // just read forward slash while scanning a numeric constant
-				 // or identifier, or from the start state.
+				 // or identifier, or from the start state. (4)
 		readesc, // just read backslash from strlit state (start of escape seq)
-		scannum, // in the middle of scanning a numeric constant
+		scannum, // in the middle of scanning a numeric constant (6)
 		error    // error state; read a messed up numeric or escape sequence.
 	};
 

@@ -10,7 +10,7 @@
  *
  *
  * Finally, please indicate approximately how many hours you spent on this:
- * #hours: 
+ * #hours:4 
  */
 
 #include "fsm.h"
@@ -26,6 +26,42 @@ using std::endl;
 // file for details.
 int cppfsm::updateState(int& state, char c) {
 	// TODO:  write this function.
-	return 0;
+	int oldState = state;
+	switch (state)
+	{
+		case 0: if (c == '"') state = 3;
+				else if (c == '/') state = 4;
+				else if (INSET(c,ident_st)) state = 1;
+				else if (INSET(c,num)) state = 6;
+				break;
+
+		case 1: if (c == '/') state = 4;
+				else if (c == '"') state = 3;
+				else if (INSET(c,iddelim)) state = 0;
+				break;
+
+		case 2: break;
+
+		case 3: if (c == '"') state = 0;
+				else if (c == '\\') state = 5;
+				break;
+
+		case 4: if (c == '/') state = 2;
+				else if (c == '"') state = 3;
+				else if (INSET(c,num)) state = 6;
+				else if (INSET(c,ident_st)) state = 1;
+				break;
+
+		case 5: if (INSET(c,escseq)) state = 3;
+				else state = 7;
+				break;
+
+		case 6: if (c == '/') state = 4;
+				else if (INSET(c,iddelim)) state = 0;
+				else if (INSET(c,num));
+				else state = 7;
+				break;
+	}
+	return oldState;
 }
 
