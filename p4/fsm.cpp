@@ -26,42 +26,51 @@ using std::endl;
 // file for details.
 int cppfsm::updateState(int& state, char c) {
 	// TODO:  write this function.
-	int oldState = state;
+	int oldState = state; //copy new state into old state
 	switch (state)
 	{
-		case 0: if (c == '"') state = 3;
+		case 0: //Beginning status
+				if (c == '"') state = 3;
 				else if (c == '/') state = 4;
 				else if (INSET(c,ident_st)) state = 1;
 				else if (INSET(c,num)) state = 6;
 				break;
 
-		case 1: if (c == '/') state = 4;
+		case 1: //While scanning an identifier
+				if (c == '/') state = 4;
 				else if (c == '"') state = 3;
 				else if (INSET(c,iddelim)) state = 0;
 				break;
 
-		case 2: break;
+		case 2: //While scanning an comment
+				break;
 
-		case 3: if (c == '"') state = 0;
+		case 3: //while scanning an string character
+				if (c == '"') state = 0;
 				else if (c == '\\') state = 5;
 				break;
 
-		case 4: if (c == '/') state = 2;
+		case 4: //Read a forward slash (/) while scanning a constant number
+				//or identifier, or from beginning state
+				if (c == '/') state = 2;
 				else if (c == '"') state = 3;
 				else if (INSET(c,num)) state = 6;
 				else if (INSET(c,ident_st)) state = 1;
 				break;
 
-		case 5: if (INSET(c,escseq)) state = 3;
+		case 5: //Read a backslash (\) while scanning a string character
+				if (INSET(c,escseq)) state = 3;
 				else state = 7;
 				break;
 
-		case 6: if (c == '/') state = 4;
+		case 6: //While scanning some constant number
+				if (c == '/') state = 4;
 				else if (INSET(c,iddelim)) state = 0;
 				else if (INSET(c,num));
 				else state = 7;
 				break;
 	}
+
 	return oldState;
 }
 
