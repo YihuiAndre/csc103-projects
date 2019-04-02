@@ -10,7 +10,7 @@
  *
  *
  * Finally, please indicate approximately how many hours you spent on this:
- * #hours: 1
+ * #hours: 4
  */
 
 #include "fsm.h"
