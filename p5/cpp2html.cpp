@@ -10,7 +10,7 @@
  *
  *
  * Finally, please indicate approximately how many hours you spent on this:
- * #hours: 
+ * #hours: 1
  */
 
 #include "fsm.h"
@@ -84,10 +84,59 @@ string translateHTMLReserved(char c) {
 	}
 }
 
+string updataLine(string str);
+int lookKeyword(string word);
+
 int main() {
 	// TODO: write the main program.
 	// It may be helpful to break this down and write
 	// a function that processes a single line, which
 	// you repeatedly call from main().
+	string str; //input sentence
+	while(getline(cin,str))
+	{
+		cout << updataLine(str);
+	}
 	return 0;
 }
+
+string updataLine(string str)
+{
+	int curState = 0, oldState = 0, syntaxE;
+	string newStr, word; //word is the word that we reading
+	for (size_t c = 0;c < str.length(); c++)
+	{
+		oldState = cppfsm::updateState(curState, str[c]);
+		switch (curState) {
+			case strlit:
+				if (oldState != strlit) newStr += hlspans[hlstrlit];
+				else if (oldState == readesc) newStr += hlspans[hlescseq] + word;
+				newStr += str[c];
+				break;
+			case start:
+				newStr += str[c];
+				syntaxE = lookKeyword(word);
+				if ((oldState != scanid && oldState != 0) || syntaxE != -1) newStr += spanend;
+				word.clear();
+				break;
+			default:
+				word += str[c];
+		}
+		*/
+	}
+	return newStr;
+}
+
+int lookKeyword(string word)
+{
+	map<string,short>::iterator it;
+	it = hlmap.find(word);
+	if (it != hlmap.end())
+	{
+		return hlmap[word];
+	}
+	return -1;
+}
+
+
+
