@@ -12,6 +12,7 @@ Note:  you  could  of  course  just call  the  above  over  and  over,  but  don
 */
 
 #include<iostream>
+#include<map>
 using namespace std;
 
 struct node{
@@ -24,20 +25,22 @@ void append(node*& L, int n); //append the number at the end of a list
 void delArr(node*& L); //Delete entire array
 void delFVal(node*& L, int x, bool stop = true); //Delete the first occurence value in the array
 void delAVal(node*& L, int x); //Delete the specific value in the list
-void appendTo(node *& L, int fVal, int sVal); //insert the value before the first occurence value (note:FVal is the value that you append before that, SVal is the value that you want to insert
+void appendTo(node *& L, int fVal, int sVal); 
+//insert the value before the first occurence value 
+//(note:FVal is the value that you append before that, SVal is 
+//the value that you want to insert
+bool detectCycle(node *& L);
 
 int main()
 {
 	node* L = new node;
 	L->data = 12;
 	L->next = NULL;
-	delFVal(L,12);
-	printArr(L);
-	append(L,14);
-	append(L,15);
-	append(L,16);
-	appendTo(L,16,13);
-	printArr(L);
+	node * A = new node;
+	A->data = 14;
+	A->next = L;
+	L->next = A;
+	cout << detectCycle(A);
 }
 
 void printArr(node *&L)
@@ -98,17 +101,17 @@ void delFVal(node*& L, int x, bool stop)
 			else if (prev ==NULL)
 			{
 				L = i->next;
-				delete i;
 			}
 			else
 			{
 				prev->next=i->next;
-				delete i;
 			}
+			delete i;
 			if (stop) break;
 		}
 		prev = i;
 	}
+
 }
 
 void delAVal(node*& L, int x)
@@ -142,4 +145,14 @@ void appendTo(node *& L, int fVal, int sVal)
 	}
 }
 
+bool detectCycle(node *& L)
+{
+	map<node*,int> A;
+	for (node* i = L; i != NULL; i++)
+	{
+		if (A[i->next]) return true; 
+		else A[i->next]++;
+	}
+	return false;
+}
 
