@@ -37,7 +37,7 @@ enum {
 	hlnumeric,    // for numeric literals (e.g. 1234)
 	hlescseq,     // for escape sequences
 	hlerror,      // for parse errors, like a bad numeric or invalid escape
-	hlident       // for other identifiers.  Probably won't use this.
+	hlident       // for other identifiers.  Probably won't use this. 8
 };
 
 // usually global variables are a bad thing, but for simplicity,
@@ -85,7 +85,7 @@ string translateHTMLReserved(char c) {
 }
 
 string updataLine(string str);
-int lookKeyword(string word);
+void lookKeyword(string word, int& syntaxE);
 
 int main() {
 	// TODO: write the main program.
@@ -102,7 +102,7 @@ int main() {
 
 string updataLine(string str)
 {
-	int curState = 0, oldState = 0, syntaxE;
+	int curState = 0, oldState = 0, syntaxE = 8;
 	string newStr, word; //word is the word that we reading
 	for (size_t c = 0;c < str.length(); c++)
 	{
@@ -127,15 +127,15 @@ string updataLine(string str)
 	return newStr;
 }
 
-int lookKeyword(string word)
+void lookKeyword(string word, int& syntaxE)
 {
 	map<string,short>::iterator it;
 	it = hlmap.find(word);
 	if (it != hlmap.end())
 	{
-		return hlmap[word];
+		syntaxE = hlmap[it];
 	}
-	return -1;
+	syntaxE = 8;
 }
 
 
