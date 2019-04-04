@@ -10,7 +10,7 @@
  *
  *
  * Finally, please indicate approximately how many hours you spent on this:
- * #hours: 4
+ * #hours: 7
  */
 
 #include "fsm.h"
@@ -85,7 +85,7 @@ string translateHTMLReserved(char c) {
 }
 
 string updataLine(string str);
-void lookKeyword(string word, int& syntaxE, int state);
+bool lookKeyword(string word);
 
 int main() {
 	// TODO: write the main program.
@@ -95,7 +95,7 @@ int main() {
 	string str; //input sentence
 	while(getline(cin,str))
 	{
-		cout << updataLine(str);
+		cout << updataLine(str + '\n');
 	}
 	return 0;
 }
@@ -103,106 +103,90 @@ int main() {
 string updataLine(string str)
 {
 	int state = 0, syntaxE = 8;
-	string newStr; //word is the word that we reading
+	string newStr, word; //word is the word that we reading
     string htmlC;
-    set<int> A; //check if there is repitite value
 	for (size_t c = 0;c < str.length(); c++)
 	{
         htmlC = translateHTMLReserved(str[c]);
 		cppfsm::updateState(state, str[c]);
+		//cout << state;
+		//if (str[c] == '\n') break;
         switch (state){
             case start:
+				if (syntaxE == hlstrlit) newStr += hlspans[syntaxE] + word + htmlC +spanend;
+				else if (syntaxE != hlident) newStr += hlspans[syntaxE] + word + spanend + htmlC;
+				else 
+				{
+					if (lookKeyword(word)) newStr += hlspans[hlmap[word]] + word + spanend + htmlC;
+					else newStr += word + htmlC;
+				}
+				word.clear();
+				syntaxE = hlident;
                 break;
             case scanid:
+				word += htmlC;
                 break;
             case comment:
+				syntaxE = hlcomment;
+				word += htmlC;
                 break;
             case strlit:
-                if (syntaxE != hlstrlit)
-                {
-                    syntaxE = hlstrlit;
-                    newStr += hlspans[hlstrlit];
-                }
+				if (syntaxE == hlescseq)
+				{
+					newStr += hlspans[syntaxE] + word + htmlC + spanend;
+					word.clear();
+				}
+				else word += htmlC;
+				syntaxE = hlstrlit;
                 break;
             case readfs:
+				if (syntaxE == hlnumeric)
+				{
+					newStr += hlspans[syntaxE] + word + spanend;
+					word.clear();
+				}
+				word += htmlC;
+				syntaxE = hlcomment;
                 break;
             case scannum:
-                if (syntaxE != hlnumeric)
-                {
-                    syntaxE = hlnumeric;
-                    newStr += hlspans[hlnumeric];
-                }
+				if (syntaxE == hlcomment) 
+				{
+					newStr += word;
+					word.clear();
+				}
+				syntaxE = hlnumeric;
+				word += htmlC;
                 break;
+			case readesc:
+				newStr += hlspans[syntaxE] + word + spanend;
+				word.clear();
+				syntaxE = hlescseq;
+				word += htmlC;
+				break;
             case error:
+				if (syntaxE != hlerror && syntaxE != hlescseq) 
+				{
+					newStr += hlspans[syntaxE] + word + spanend;
+					word.clear();
+				}
+				syntaxE = hlerror;
+				word += htmlC;
                 break;
         }
 
-        switch (syntaxE){
-            case hlstatement:
-                break;
-            case hlcomment:
-                break;
-            case hlstrlit:
-                cout << str[c] << state <<" ";
-                if (state != strlit)
-                {
-                    newStr += spanend;
-                    syntaxE = 8;
-                }
-                else newStr += htmlC;
-                break;
-            case hlpreproc:
-                break;
-            case hltype:
-                break;
-            case hlnumeric:
-                if (state != scannum)
-                {
-                    newStr += spanend;
-                    syntaxE = 8;
-                    break;
-                }
-                newStr += htmlC;
-                break;
-            case hlescseq:
-                break;
-            case hlerror:
-                break;
-            default:
-                newStr += str[c];
-        }
-        /*
-        switch (syntaxE){
-            case start:
-                break;
-            case scanid:
-                break;
-            case comment:
-                break;
-            case strlit:
-                break;
-            case readfs:
-                break;
-            case scannum:
-                newStr += hlspans[hlnumeric];
-                break;
-            case error:
-                break;
-        }
-         */
 	}
 	return newStr;
 }
 
-void lookKeyword(string word, int& syntaxE, int state)
+bool lookKeyword(string word)
 {
 	map<string,short>::iterator it;
 	it = hlmap.find(word);
 	if (it != hlmap.end())
 	{
-		syntaxE = hlmap[word];
+		return true;
 	}
-	syntaxE = 8;
+	return false;
 }
 
 
