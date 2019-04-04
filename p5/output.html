@@ -20,38 +20,199 @@ body { font-family: monospace; color: #839496; background-color: #002b36; }
 </head>
 <body>
 <pre>
+<span class='comment'>/*</span>
+ * CSc103 Project <span class='numeric'>5</span>: Syntax highlighting, part two.
+ * See readme.html <span class='statement'>for</span> details.
+ * Please list all references you made use of in order to complete the
+ * assignment: your classmates, websites, etc.  Aside from the lecture notes
+ * <span class='statement'>and</span> the book, please list everything.  And remember- citing a source does
+ * NOT mean it is okay to COPY THAT SOURCE.  What you submit here **MUST BE
+ * YOUR OWN WORK**.
+ * References:
+ *
+ *
+ * Finally, please indicate approximately how many hours you spent on <span class='statement'>this</span>:
+ * #hours: <span class='numeric'>7</span>
+ *<span class='comment'>/</span>
+
+<span class='preproc'>#include</span> <span class='strlit'>&quot;fsm.h&quot;</span>
+<span class='statement'>using</span> <span class='statement'>namespace</span> cppfsm;
 <span class='preproc'>#include</span> &lt;iostream&gt;
 <span class='statement'>using</span> std::cin;
 <span class='statement'>using</span> std::cout;
 <span class='statement'>using</span> std::endl;
 <span class='preproc'>#include</span> &lt;string&gt;
 <span class='statement'>using</span> std::string;
+<span class='preproc'>#include</span> &lt;set&gt;
+<span class='statement'>using</span> std::set;
 <span class='preproc'>#include</span> &lt;map&gt;
 <span class='statement'>using</span> std::map;
 <span class='preproc'>#include</span> &lt;initializer_list&gt; <span class='comment'>// for setting up maps without constructors.</span>
 
+<span class='comment'>// enumeration for our highlighting tags:</span>
+<span class='type'>enum</span> {
+&nbsp;&nbsp;&nbsp;&nbsp;hlstatement,  <span class='comment'>// used for &quot;if,else,for,while&quot; etc...</span>
+&nbsp;&nbsp;&nbsp;&nbsp;hlcomment,    <span class='comment'>// for comments</span>
+&nbsp;&nbsp;&nbsp;&nbsp;hlstrlit,     <span class='comment'>// for string literals</span>
+&nbsp;&nbsp;&nbsp;&nbsp;hlpreproc,    <span class='comment'>// for preprocessor directives (e.g., #include)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;hltype,       <span class='comment'>// for datatypes and similar (e.g. int, char, double)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;hlnumeric,    <span class='comment'>// for numeric literals (e.g. 1234)</span>
+&nbsp;&nbsp;&nbsp;&nbsp;hlescseq,     <span class='comment'>// for escape sequences</span>
+&nbsp;&nbsp;&nbsp;&nbsp;hlerror,      <span class='comment'>// for parse errors, like a bad numeric or invalid escape</span>
+&nbsp;&nbsp;&nbsp;&nbsp;hlident       <span class='comment'>// for other identifiers.  Probably won&apos;t use this. 8</span>
+};
+
 <span class='comment'>// usually global variables are a bad thing, but for simplicity,</span>
 <span class='comment'>// we&apos;ll make an exception here.</span>
-
 <span class='comment'>// initialize our map with the keywords from our list:</span>
-map&lt;string, <span class='type'>short</span>&gt; reserved = {
-<span class='preproc'>#include</span> <span class='strlit'>&quot;keywords.txt&quot;</span>
+map&lt;string, <span class='type'>short</span>&gt; hlmap = {
+<span class='preproc'>#include</span> <span class='strlit'>&quot;res/keywords.txt&quot;</span>
 };
-<span class='comment'>// note: this is not a very standard use of #include...</span>
+<span class='comment'>// note: the above is not a very standard use of #include...</span>
+
+<span class='comment'>// map of highlighting spans:</span>
+map&lt;<span class='type'>int</span>, string&gt; hlspans = {
+&nbsp;&nbsp;&nbsp;&nbsp;{hlstatement, <span class='strlit'>&quot;&lt;span class=&apos;statement&apos;&gt;&quot;</span>},
+&nbsp;&nbsp;&nbsp;&nbsp;{hlcomment, <span class='strlit'>&quot;&lt;span class=&apos;comment&apos;&gt;&quot;</span>},
+&nbsp;&nbsp;&nbsp;&nbsp;{hlstrlit, <span class='strlit'>&quot;&lt;span class=&apos;strlit&apos;&gt;&quot;</span>},
+&nbsp;&nbsp;&nbsp;&nbsp;{hlpreproc, <span class='strlit'>&quot;&lt;span class=&apos;preproc&apos;&gt;&quot;</span>},
+&nbsp;&nbsp;&nbsp;&nbsp;{hltype, <span class='strlit'>&quot;&lt;span class=&apos;type&apos;&gt;&quot;</span>},
+&nbsp;&nbsp;&nbsp;&nbsp;{hlnumeric, <span class='strlit'>&quot;&lt;span class=&apos;numeric&apos;&gt;&quot;</span>},
+&nbsp;&nbsp;&nbsp;&nbsp;{hlescseq, <span class='strlit'>&quot;&lt;span class=&apos;escseq&apos;&gt;&quot;</span>},
+&nbsp;&nbsp;&nbsp;&nbsp;{hlerror, <span class='strlit'>&quot;&lt;span class=&apos;error&apos;&gt;&quot;</span>}
+};
+<span class='comment'>// note: initializing maps as above requires the -std=c++0x compiler flag,</span>
+<span class='comment'>// as well as #include&lt;initializer_list&gt;.  Very convenient though.</span>
+<span class='comment'>// to save some typing, store a variable for the end of these tags:</span>
+string spanend = <span class='strlit'>&quot;&lt;/span&gt;&quot;</span>;
+
+string translateHTMLReserved(<span class='type'>char</span> c) {
+&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>switch</span> (c) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>case</span> &apos;<span class='strlit'>&quot;&apos;:
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>return</span> <span class='strlit'>&quot;&amp;quot;&quot;</span>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>case</span> &apos;\&apos;&apos;:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>return</span> <span class='strlit'>&quot;&amp;apos;&quot;</span>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>case</span> &apos;&amp;&apos;:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>return</span> <span class='strlit'>&quot;&amp;amp;&quot;</span>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>case</span> &apos;&lt;&apos;:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>return</span> <span class='strlit'>&quot;&amp;lt;&quot;</span>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>case</span> &apos;&gt;&apos;:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>return</span> <span class='strlit'>&quot;&amp;gt;&quot;</span>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>case</span> &apos;\t&apos;: <span class='comment'>// make tabs 4 spaces instead.</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>return</span> <span class='strlit'>&quot;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&quot;</span>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>default</span>:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='type'>char</span> s[<span class='numeric'>2</span>] = {c,<span class='numeric'>0</span>};
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>return</span> s;
+&nbsp;&nbsp;&nbsp;&nbsp;}
+}
+
+string updataLine(string str);
+<span class='type'>bool</span> lookKeyword(string word);
 
 <span class='type'>int</span> main() {
-&nbsp;&nbsp;&nbsp;&nbsp;<span class='comment'>//do stuff</span>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class='type'>int</span> x = <span class='numeric'>77</span>;
-&nbsp;&nbsp;&nbsp;&nbsp;<span class='type'>int</span> y = x * <span class='numeric'>91</span>;
-&nbsp;&nbsp;&nbsp;&nbsp;cout &lt;&lt; <span class='strlit'>&quot;this is super fun.</span><span class='escseq'>\n</span><span class='strlit'>&quot;</span>;
-&nbsp;&nbsp;&nbsp;&nbsp;cout &lt;&lt; <span class='strlit'>&quot;:D</span><span class='escseq'>\n</span><span class='strlit'>&quot;</span>;
-&nbsp;&nbsp;&nbsp;&nbsp;cout &lt;&lt; <span class='strlit'>&quot;let&apos;s make sure comments // in strings are strings</span><span class='escseq'>\n</span><span class='strlit'>&quot;</span>;
-&nbsp;&nbsp;&nbsp;&nbsp;<span class='comment'>// and that &quot;strings&quot; in comments are &quot;comments&quot;</span>
-&nbsp;&nbsp;&nbsp;&nbsp;cout &lt;&lt; <span class='strlit'>&quot;a bad escape: </span><span class='error'>\o causes errors&quot;;</span>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class='comment'>// could also have errors parsing numeric constants:</span>
-&nbsp;&nbsp;&nbsp;&nbsp;cout &lt;&lt; <span class='numeric'>99</span><span class='error'>ZXY;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class='comment'>// TODO: write the main program.</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class='comment'>// It may be helpful to break this down and write</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class='comment'>// a function that processes a single line, which</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class='comment'>// you repeatedly call from main().</span>
+&nbsp;&nbsp;&nbsp;&nbsp;string str; <span class='comment'>//input sentence</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>while</span>(getline(cin,str))
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cout &lt;&lt; updataLine(str + &apos;\n&apos;);
+&nbsp;&nbsp;&nbsp;&nbsp;}
 &nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>return</span> <span class='numeric'>0</span>;
 }
+
+string updataLine(string str)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;<span class='type'>int</span> state = <span class='numeric'>0</span>, syntaxE = <span class='numeric'>8</span>;
+&nbsp;&nbsp;&nbsp;&nbsp;string newStr, word; <span class='comment'>//word is the word that we reading</span>
+    string htmlC;
+&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>for</span> (size_t c = <span class='numeric'>0</span>;c &lt; str.length(); c++)
+&nbsp;&nbsp;&nbsp;&nbsp;{
+        htmlC = translateHTMLReserved(str[c]);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cppfsm::updateState(state, str[c]);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='comment'>//cout &lt;&lt; state;</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='comment'>//if (str[c] == &apos;\n&apos;) break;</span>
+        <span class='statement'>switch</span> (state){
+            <span class='statement'>case</span> start:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>if</span> (syntaxE == hlstrlit) newStr += hlspans[syntaxE] + word + htmlC +spanend;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>else</span> <span class='statement'>if</span> (syntaxE != hlident) newStr += hlspans[syntaxE] + word + spanend + htmlC;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>else</span> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>if</span> (lookKeyword(word)) newStr += hlspans[hlmap[word]] + word + spanend + htmlC;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>else</span> newStr += word + htmlC;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;word.clear();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;syntaxE = hlident;
+                <span class='statement'>break</span>;
+            <span class='statement'>case</span> scanid:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;word += htmlC;
+                <span class='statement'>break</span>;
+            <span class='statement'>case</span> comment:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;syntaxE = hlcomment;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;word += htmlC;
+                <span class='statement'>break</span>;
+            <span class='statement'>case</span> strlit:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>if</span> (syntaxE == hlescseq)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;newStr += hlspans[syntaxE] + word + htmlC + spanend;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;word.clear();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>else</span> word += htmlC;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;syntaxE = hlstrlit;
+                <span class='statement'>break</span>;
+            <span class='statement'>case</span> readfs:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>if</span> (syntaxE == hlnumeric)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;newStr += hlspans[syntaxE] + word + spanend;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;word.clear();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;word += htmlC;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;syntaxE = hlcomment;
+                <span class='statement'>break</span>;
+            <span class='statement'>case</span> scannum:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>if</span> (syntaxE == hlcomment) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;newStr += word;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;word.clear();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;syntaxE = hlnumeric;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;word += htmlC;
+                <span class='statement'>break</span>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>case</span> readesc:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;newStr += hlspans[syntaxE] + word + spanend;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;word.clear();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;syntaxE = hlescseq;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;word += htmlC;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>break</span>;
+            <span class='statement'>case</span> error:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>if</span> (syntaxE != hlerror &amp;&amp; syntaxE != hlescseq) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;newStr += hlspans[syntaxE] + word + spanend;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;word.clear();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;syntaxE = hlerror;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;word += htmlC;
+                <span class='statement'>break</span>;
+        }
+
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>return</span> newStr;
+}
+
+<span class='type'>bool</span> lookKeyword(string word)
+{
+&nbsp;&nbsp;&nbsp;&nbsp;map&lt;string,<span class='type'>short</span>&gt;::iterator it;
+&nbsp;&nbsp;&nbsp;&nbsp;it = hlmap.find(word);
+&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>if</span> (it != hlmap.end())
+&nbsp;&nbsp;&nbsp;&nbsp;{
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>return</span> <span class='type'>true</span>;
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;<span class='statement'>return</span> <span class='type'>false</span>;
+}
+
+
+
 </pre>
 </body>
 </html>

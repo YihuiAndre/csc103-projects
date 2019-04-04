@@ -109,7 +109,7 @@ string updataLine(string str)
 	{
         htmlC = translateHTMLReserved(str[c]);
 		cppfsm::updateState(state, str[c]);
-		//cout << state;
+		cout << state;
 		//if (str[c] == '\n') break;
         switch (state){
             case start:
