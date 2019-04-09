@@ -95,84 +95,82 @@ int main() {
 	string str; //input sentence
 	while(getline(cin,str))
 	{
-		cout << updataLine(str + '\n');
+		cout << updataLine(str + '\n'); //this can rewrite the line as CSS format
 	}
 	return 0;
 }
 
 string updataLine(string str)
 {
-	int state = 0, syntaxE = 8;
+	int state = 0, syntaxE = 8; //syntaxE is syntax element Eg: hlstrlit
 	string newStr, word; //word is the word that we reading
     string htmlC;
 	for (size_t c = 0;c < str.length(); c++)
 	{
-        htmlC = translateHTMLReserved(str[c]);
-		cppfsm::updateState(state, str[c]);
-		cout << state;
-		//if (str[c] == '\n') break;
-        switch (state){
-            case start:
+        htmlC = translateHTMLReserved(str[c]); //html char
+		cppfsm::updateState(state, str[c]); //update the state
+        switch (state){ //each represent different state
+            case start: //0
 				if (syntaxE == hlstrlit) newStr += hlspans[syntaxE] + word + htmlC +spanend;
+				//when the word is end by "
 				else if (syntaxE != hlident) newStr += hlspans[syntaxE] + word + spanend + htmlC;
+				//anything except for 1, 0 and 2 state
 				else 
 				{
 					if (lookKeyword(word)) newStr += hlspans[hlmap[word]] + word + spanend + htmlC;
+					//find the keyword
 					else newStr += word + htmlC;
+					//if the keyword not found, just add it
 				}
 				word.clear();
 				syntaxE = hlident;
                 break;
             case scanid:
-				word += htmlC;
                 break;
             case comment:
 				syntaxE = hlcomment;
-				word += htmlC;
                 break;
             case strlit:
-				if (syntaxE == hlescseq)
+				if (syntaxE == hlescseq) //special case
 				{
 					newStr += hlspans[syntaxE] + word + htmlC + spanend;
 					word.clear();
 				}
-				else word += htmlC;
+				else word += htmlC; //this is becase when word is \n, then n can't be add
 				syntaxE = hlstrlit;
                 break;
             case readfs:
-				if (syntaxE == hlnumeric)
+				if (syntaxE == hlnumeric) //special case
 				{
 					newStr += hlspans[syntaxE] + word + spanend;
 					word.clear();
 				}
-				word += htmlC;
 				syntaxE = hlcomment;
                 break;
             case scannum:
-				if (syntaxE == hlcomment) 
+				if (syntaxE == hlcomment) //special case
 				{
 					newStr += word;
 					word.clear();
 				}
 				syntaxE = hlnumeric;
-				word += htmlC;
                 break;
 			case readesc:
-				newStr += hlspans[syntaxE] + word + spanend;
+				newStr += hlspans[syntaxE] + word + spanend; //end the string eariler
 				word.clear();
 				syntaxE = hlescseq;
-				word += htmlC;
 				break;
             case error:
-				if (syntaxE != hlerror && syntaxE != hlescseq) 
+				if (syntaxE != hlerror && syntaxE != hlescseq) //end the word berfore error
 				{
 					newStr += hlspans[syntaxE] + word + spanend;
 					word.clear();
 				}
 				syntaxE = hlerror;
-				word += htmlC;
                 break;
         }
+		if (state != start && state != strlit) word += htmlC;
+
 
 	}
 	return newStr;

@@ -10,7 +10,7 @@
  *
  *
  * Finally, please indicate approximately how many hours you spent on this:
- * #hours:13
+ * #hours:13 
  */
 #include <cstdio>
 #include <stdlib.h> // for exit();
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	/* NOTE: at this point wfilename initfilename and max_gen
-	 * are all set according to the command line: */
+	 * are all set according to the command line: */	
 	//printf("input file:  %s\n",initfilename.c_str());
 	//printf("output file: %s\n",wfilename.c_str());
 	//printf("fast forward to generation: %lu\n",max_gen);
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
 
 void mainLoop() {
 	/* TODO: write this */
-	/* update, write, sleep */
+	/* update, write, sleep */	
 	cWorld = world;//copy world to other world
 	if (wfilename == "-"){ //in case there is not file name given
 		FILE* stdin(stdout);
@@ -140,7 +140,7 @@ size_t nbrCount(size_t i, size_t j, const vector<vector<bool> >& g)
 	return Neighbors - g[i][j];//since it count itself, need to subtract it
 }
 
-void initFromFile(const string& fname)
+void initFromFile(const string& fname) 
 {
 	FILE* f  = fopen(fname.c_str(), "rb"); //read file
 	if (!f) exit(1); //test if file fail
@@ -149,7 +149,7 @@ void initFromFile(const string& fname)
 	size_t row = 0;
 	while (fread(&c,1,1,f))
 	{
-		if (c != '{' && c != ',' && c != '}'){
+		if (c != '{' && c != ',' && c != '}'){ 
 			//in case the file contain {0,0,1},{1,0,0}
 			if (c == '\n'){
 				row++;
