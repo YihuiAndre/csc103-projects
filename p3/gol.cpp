@@ -117,7 +117,6 @@ void mainLoop() {
 		for (size_t k = 0; k < max_gen; k++)
 		{
 			update();
-			sleep(1);
 		}
 			dumpState(fworld);
 	}

@@ -36,11 +36,10 @@ int main()
 	node* L = new node;
 	L->data = 12;
 	L->next = NULL;
-	node * A = new node;
-	A->data = 14;
-	A->next = L;
-	L->next = A;
-	cout << detectCycle(A);
+	append(L, 14);
+	append(L, 15);
+	delFVal(L, 14);
+	printArr(L);
 }
 
 void printArr(node *&L)
@@ -78,12 +77,11 @@ void append(node*& L, int n)
 void delArr(node*& L)
 {
 	if (L == NULL) return;
-	node* n = new node;
-	for (node* i = L; i != NULL; i = i->next)
+	for (node* i = L; i != NULL; i = L)
 	{
-		n=i->next;
-		delete L;
-		L = n;
+		L = i->next;
+		delete i;
+		i = L;
 	}
 
 }
@@ -91,8 +89,8 @@ void delArr(node*& L)
 void delFVal(node*& L, int x, bool stop)
 {
 	if (L == NULL) return;
-	node* prev = new node;
-	prev = NULL;
+	/*
+	node* prev = NULL;
 	for (node* i = L; i != NULL; i = i->next)
 	{
 		if (i->data == x)
@@ -111,6 +109,12 @@ void delFVal(node*& L, int x, bool stop)
 		}
 		prev = i;
 	}
+	*/
+	for (node** i = &L; *i != NULL; *i = (*i)->next)
+	{
+		
+	}
+
 
 }
 
