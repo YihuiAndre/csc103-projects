@@ -21,6 +21,20 @@ using std::endl;
 #include <getopt.h> // to parse long arguments.
 #include <cstdlib> // for atoi function
 
+void tower(short num, short start, short end) 
+	//num is number of disk on start position, start is beginning position
+	//end is end position
+{
+	if (){ 
+		cout << start << "  " << end << "\n";
+		return;
+	}
+	end = start + 1;
+	cout << start << "  " << end << "\n"
+	tower(num, start, end)
+
+}
+
 /* Here's a skeleton main function for processing the arguments. */
 int main(int argc, char *argv[]) {
 	// define long options
@@ -54,6 +68,7 @@ int main(int argc, char *argv[]) {
 
 	/* TODO: now that you have the options and arguments,
 	 * solve the puzzle. */
-
+	tower(n,start,end);
 	return 0;
 }
+
