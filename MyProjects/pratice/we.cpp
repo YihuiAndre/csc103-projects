@@ -16,7 +16,7 @@ int main()
 	{
 		cout << V[i] << " ";
 	}
-	cout << endl;d
+	cout << endl;
 
 	return 0;
 }
