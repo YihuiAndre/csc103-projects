@@ -20,19 +20,18 @@ using std::cout;
 using std::endl;
 #include <getopt.h> // to parse long arguments.
 #include <cstdlib> // for atoi function
+#include<vector>
 
-void tower(short num, short start, short end) 
-	//num is number of disk on start position, start is beginning position
-	//end is end position
+void tower(short n, short begin, short goal) 
 {
-	if (){ 
-		cout << start << "  " << end << "\n";
+	if (n == 1) {
+		cout << begin << "  " << goal << endl;
 		return;
 	}
-	end = start + 1;
-	cout << start << "  " << end << "\n"
-	tower(num, start, end)
-
+	short mid = 6 - goal - begin;
+	tower(n-1,begin,mid);
+	tower(1,begin,goal);
+	tower(n-1,mid,goal);
 }
 
 /* Here's a skeleton main function for processing the arguments. */
@@ -68,6 +67,7 @@ int main(int argc, char *argv[]) {
 
 	/* TODO: now that you have the options and arguments,
 	 * solve the puzzle. */
+	if ((start > 3 || start < 0) || (end > 3 || end < 0)) return 0;
 	tower(n,start,end);
 	return 0;
 }
