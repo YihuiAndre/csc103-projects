@@ -60,31 +60,43 @@ void mergeSort(vector<int>& A){
 	return;
 }
 
-void swap(int* a, int* b){
-	int tmp = a;
+void swap(string &a, string &b){
+	string tmp = a;
 	a = b;
 	b = tmp;
 }
 
 vector<vector<string>> perms(vector<string> S){
-	vector<vector<string>> T;
-	if (S.size() <= 1){
+	vector<vector<string>> T = {};
+	if (S.size() <= 1){ //base case
 		T.push_back(S);
 		return T;
 	}
+	string D;
 	vector<string> tmp;
-	vector<vector<string>> P;
-	for (size_t i = 0; i < S.size(); i++){
-		swap(S[0],S[i]);
+	vector<vector<string>> P;//store return value
+	for (size_t i = S.size(); i != 0; i--){
+		swap(S[S.size()-1],S[i-1]);
+		D = S[S.size()-1];
 		tmp = S;
-		P = perms(tmp.pop_back());
-		for (size_t k = 0; k < P.size(); k++)
-			P[0] += S[0];
-
+		tmp.pop_back();
+		P = perms(tmp);
+		for (size_t k = 0; k < P.size(); k++){
+			P[k].push_back(D);
+			T.push_back(P[k]);
+		}
 	}
-
+	return T;
 }
 
+void display(vector<vector<string>> S){
+	for (size_t i = 0; i < S.size(); i++){
+		for (size_t k = 0; k < S[i].size(); k++){
+			cout << S[i][k] << " ";
+		}
+		cout << "\n";
+	}
+}
 
 int main(){
 	cout << power(2,3) << endl;
@@ -94,5 +106,9 @@ int main(){
 	cout << search(A,5,100) << "\n";
 	vector<int> B = {5,4,3,2,1};
 	mergeSort(B);
+	vector<string> C = {"a","b","c","d"};
+	vector<vector<string>> T;
+	T = perms(C);
+	display(T);
 	return 0;
 }

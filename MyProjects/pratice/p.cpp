@@ -8,6 +8,7 @@ void swap(int& a, int& b);
 
 int main()
 {
+	/*
 	vector<int> v = {9,8,7,6,5,4,3,2,1};
 	int n, small = INT_MAX, S_small;
 	while(cin >> n)
@@ -28,6 +29,10 @@ int main()
 	{
 		cout << v[i] << " ";
 	}
+	*/
+	int* A = new int[3];
+	int B[3];
+	
 }
 
 void sort(vector<int> &n)
