@@ -40,7 +40,7 @@ SDL_GLContext gContext; /* openGL context */
 const double cx = 0;
 const double cy = 0;
 const double cz = -1.7;
-const double r = 0.5;
+const double r = .5;
 
 double faces[6][4][3]; /* used for drawing; you can ignore it. */
 
