@@ -180,7 +180,7 @@ bool init()
 	}
 
 	/* XXX take this out: just a test */
-	// SDL_SetWindowOpacity(gWindow,0.7);
+	SDL_SetWindowOpacity(gWindow,0.7);
 
 	/* XXX setup polygon VBO's here if needed. */
 	return true;
