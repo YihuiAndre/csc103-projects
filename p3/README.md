@@ -25,4 +25,4 @@ pkill -x life
 
 
 ## Demonstrations
-<img src="./example.gif" width="700" height="400" />
+<img src="./example.gif" width="900" height="600" />
